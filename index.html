@@ -2,21 +2,45 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>무엇이든 먹어보살</title>
     <style>
-        /* [CSS] 전체 스타일 */
+        /* [CSS] 기존 스타일 유지 */
         body {
-            background-color: #f8f9fa;
+            background: linear-gradient(to bottom, #fff9e6 0%, #f8f9fa 100%);
             font-family: 'Pretendard', sans-serif;
             text-align: center;
-            padding-top: 1px;
+            padding-top: 50px;
             margin: 0;
         }
 
-        h1 { color: #333; margin-bottom: 10px; }
+        h1 { color: #333; margin-bottom: 15px; }
         .description { color: #666; margin-bottom: 30px; }
+        h1::before { content: "🔮 "; }
+        h1::after { content: " 🔮"; }
 
-        /* [CSS] 버튼 그룹 */
+        .btn-fixed {
+            position: fixed;
+            top: 20px;
+            padding: 10px 20px;
+            font-size: 15px;
+            background-color: #333;
+            color: #ffd700;
+            border: 2px solid #ffd700;
+            border-radius: 50px;
+            cursor: pointer;
+            z-index: 1000;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+        .btn-fixed:hover {
+            background-color: #ffd700;
+            color: #333;
+        }
+
+        .btn-top-left { left: 20px; }
+        .btn-top-right { right: 20px; }
+
         .button-group {
             display: flex;
             justify-content: center;
@@ -25,8 +49,8 @@
         }
 
         .btn {
-            padding: 12px 24px;
-            font-size: 16px;
+            padding: 15px 35px;
+            font-size: 20px;
             font-weight: bold;
             color: white;
             border: none;
@@ -40,22 +64,17 @@
         .btn-orange { background-color: #e67e22; }
         .btn-yellow { background-color: #ffd700; color: #333; }
 
-        .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); opacity: 0.8; }
-
-        /* -------------------------------------------------- */
-        /* [CSS] 절대 좌표 배치를 위한 설정 영역 */
-        /* -------------------------------------------------- */
-        
         .position-area {
-            position: relative;   /* 자식(사진)들의 기준점이 됩니다 */
-            width: 100%;          /* 화면 전체 너비 사용 */
-            height: 600px;        /* 사진들이 배치될 넉넉한 높이 */
+            position: relative;
+            width: 100%;
+            height: 600px;
             margin-top: 20px;
+            overflow: hidden;
         }
 
         .position-area img {
-            position: absolute;   /* 기준점을 바탕으로 자유롭게 배치 */
-            width: 380px;         /* 사진 크기 조절 */
+            position: absolute;
+            width: 380px;
             height: 280px;
             object-fit: cover;
             border-radius: 12px;
@@ -63,29 +82,69 @@
             transition: 0.3s;
         }
 
-        /* 각 사진의 위치 지정 (원하는 대로 수정하세요!) */
-        /* top: 위에서부터 거리, left/right: 왼쪽/오른쪽에서부터 거리 */
         .img1 { top: 20px;  left: 10%; transform: rotate(-5deg); }
         .img2 { top: 150px; left: 30%; transform: rotate(8deg); z-index: 2; }
         .img3 { top: 25px;  right: 30%; transform: rotate(-10deg); }
         .img4 { top: 120px; right: 10%; transform: rotate(8deg); z-index: 2; }
 
-        .position-area img:hover {
-            transform: scale(1.1) rotate(0deg); /* 마우스 올리면 커지고 똑바로 서기 */
-            z-index: 10; /* 겹쳐있어도 맨 위로 올라오게 함 */
+        /* [NEW] 사진 팝업 모달 스타일 */
+        #imageModal {
+            display: none; /* 기본은 숨김 */
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #modalImage {
+            max-width: 80%;
+            max-height: 70%;
+            border: 5px solid #ffd700;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+        }
+
+        .modal-text {
+            color: #ffd700;
+            font-size: 24px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        .modal-close {
+            margin-top: 30px;
+            padding: 10px 30px;
+            background: #ffd700;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
+    <button class="btn-fixed btn-top-left" onclick="handleConfirm('left')">깜놀 주의 1111</button>
+    <button class="btn-fixed btn-top-right" onclick="handleConfirm('right')">깜놀 주의 2222</button>
+
     <h1>무엇이든 골라보살</h1>
     <p class="description">지금 메뉴가 고민된다면? 버튼을 눌러보시게나</p>
 
+    <div id="imageModal">
+        <p class="modal-text">🔮 보살이 나타났다! 🔮</p>
+        <img id="modalImage" src="https://via.placeholder.com/600x400/333/ffd700?text=BOSAL+APPEARS" alt="보살등장">
+        <button class="modal-close" onclick="closeModal()">성불하시게나 (닫기)</button>
+    </div>
+
     <div class="button-group">
-        <button class="btn btn-blue" onclick="window.open('https://www.google.com')">한식</button>
-        <button class="btn btn-green" onclick="window.open('https://www.naver.com')">양식</button>
-        <button class="btn btn-orange" onclick="window.open('https://www.youtube.com')">중식</button>
-        <button class="btn btn-yellow" onclick="window.open('https://www.youtube.com')">일식</button>
+        <button class="btn btn-blue" onclick="openMenuWindow('한식', '아직 개발 중인 메뉴라네 나중에 오시게나')">한식</button>
+        <button class="btn btn-green" onclick="openMenuWindow('양식', '아직 개발 중인 메뉴라네 나중에 오시게나')">양식</button>
+        <button class="btn btn-orange" onclick="openMenuWindow('중식', '아직 개발 중인 메뉴라네 나중에 오시게나')">중식</button>
+        <button class="btn btn-yellow" onclick="openMenuWindow('일식', '아직 개발 중인 메뉴라네 나중에 오시게나')">일식</button>
     </div>
 
     <div class="position-area">
@@ -95,5 +154,58 @@
         <img src="bg4.jpg" alt="음식사진4" class="img4">
     </div>
 
+    <script>
+        // 상단 버튼 전용 확인 함수
+        function handleConfirm(type) {
+            const isConfirmed = confirm("정말 다음으로 넘어가시겠나?");
+            
+            if (isConfirmed) {
+                // 확인을 누르면 모달 사진창을 띄움
+                showModal(type);
+            }
+        }
+
+        // 모달 띄우기
+        function showModal(type) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            
+            // 버튼 종류에 따라 다른 사진을 보여주고 싶다면 여기서 분기 처리 가능
+            if(type === 'left') {
+                modalImg.src = "bg5.jpg"; // 왼쪽 버튼용 사진 경로
+            } else {
+                modalImg.src = "bg6.jpg"; // 오른쪽 버튼용 사진 경로
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        // 모달 닫기
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        // 메뉴 팝업 함수 (기존 유지)
+        function openMenuWindow(category, message) {
+            const width = 450;
+            const height = 400;
+            const left = (window.screen.width / 2) - (width / 2);
+            const top = (window.screen.height / 2) - (height / 2);
+            const windowFeatures = `width=${width},height=${height},left=${left},top=${top},resizable=no`;
+            const newWindow = window.open("", "_blank", windowFeatures);
+
+            if (newWindow) {
+                newWindow.document.write(`
+                    <html>
+                    <body style="background-color: #fff9e6; text-align: center; padding: 50px;">
+                        <h2>🔮 보살의 선택: ${category}</h2>
+                        <p>${message}</p>
+                        <button onclick="window.close()">닫기</button>
+                    </body>
+                    </html>
+                `);
+            }
+        }
+    </script>
 </body>
 </html>
